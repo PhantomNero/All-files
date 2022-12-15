@@ -1,6 +1,7 @@
 #Создай собственный Шутер!
 from pygame import *
 from random import randint
+from time import time as timer
 
 """Main window"""
 print("Выберите режим игры:")
@@ -83,13 +84,14 @@ fire_sound = mixer.Sound(fire_s)
 font.init()
 font1 = font.SysFont('Arial', 80)
 font2 = font.SysFont('Arial', 36)
-win = font1.render("   Победа", True, (0, 0, 0))
-lose = font1.render("Поражение", True, (0, 0, 0))
+win = font1.render("   Победа", True, (255, 0, 0))
+lose = font1.render("Поражение", True, (255, 0, 0))
 
 lost = 0 # Корааблей пропущено.
 score = 0 # Кораблей сбито.
 max_lost = 5 # Проиграли, если пропустили какое-то кол-во кораблей.
 goal = 100 # Столько кораблей надо сбить.
+life = 3
 
 class GameSprite(sprite.Sprite):
     """Родительский клсс."""
@@ -200,19 +202,29 @@ for i in range(1, 6):
 bullets = sprite.Group()
 finish = False
 run = True
+rel_time = False  # флаг перезарядки
+num_fire = 0  # счётчик выстрелов
 while run:
     for e in event.get():
         if e.type == QUIT:
             run = False
         elif e.type == KEYDOWN:
             if e.key == K_SPACE:
-                fire_sound.play()
-                ship.fire()
+                '''проверяем количество выстрелов и не идёт ли перезарядка'''
+                if num_fire < 7 and rel_time == False:
+                    num_fire += 1
+                    fire_sound.play()
+                    ship.fire()
+                if num_fire >= 7 and rel_time == False:
+                    last_time = timer()
+                    rel_time = True
 
     if not finish:
+        '''обновляем фон'''
         window.blit(background, (0, 0))
-        text = font2.render("Счёт: " + str(score), 1, (0, 0, 0))
-        text_lose = font2.render("Пропущено: " + str(lost), 1, (0, 0, 0))
+
+        text = font2.render("Счёт: " + str(score), 1, (255, 0, 0))
+        text_lose = font2.render("Пропущено: " + str(lost), 1, (255, 0, 0))
         window.blit(text, (10, 20))
         window.blit(text_lose, (10, 50))
         ship.reset()
@@ -222,18 +234,47 @@ while run:
         bullets.draw(window)
         monsters.draw(window)
         collides = sprite.groupcollide(monsters, bullets, True, True)
+
+        if rel_time == True:
+            now_time = timer()
+            if now_time - last_time < 1:
+                reload = font2.render('Перезарядка...', 1, (255, 0, 0))
+                window.blit(reload, (260, 460))
+            else:
+                num_fire = 0  # обнуляем счётчик пуль
+                rel_time = False  # сбрасываем флаг перезарядки
+
+
         for c in collides:
             score += 1
             monster = Enemy(changemonster, randint(20, win_width - 80), -40, 80, cordx, randint(3, 5))
             monsters.add(monster)
 
-        if sprite.spritecollide(ship, monsters, False) or lost >= max_lost:
-            finish = True
+        if sprite.spritecollide(ship, monsters, False):
+            sprite.spritecollide(ship, monsters, True)
+            life -= 1
+
+        if life == 0 or lost >= max_lost:
+            finish = True  # проиграли, больше не управляем спрайтами
             window.blit(lose, (200, 200))
 
         if score >= goal:
             finish = True
             window.blit(win, (200, 200))
+
+        '''задаём разный цвет в зависимости от кол-ва жизней'''
+        if life == 3:
+            life_color = (0, 150, 0)
+        if life == 2:
+            life_color = (150, 150, 0)
+        if life == 1:
+            life_color = (150, 0, 0)
+
+        text_life = font1.render(str(life), 1, life_color)
+        window.blit(text_life, (600, 10))
+
+
+
         display.update()
     time.delay(60)
 
