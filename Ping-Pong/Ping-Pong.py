@@ -1,5 +1,4 @@
 from pygame import *
-from time import *
 
 """Classes."""
 class GameSprite(sprite.Sprite):
@@ -53,7 +52,7 @@ ball = GameSprite("tenis_ball.png", 200, 200, 4 , 50, 50)
 
 "Fonts."
 font.init()
-font = font.Font(None, 35)
+font = font.Font("Font_write.ttf", 35)
 lose1 = font.render("Player 1 lost.", True, (180, 0, 0))
 lose2 = font.render("Player 2 lost.", True, (180, 0, 0))
 
@@ -68,8 +67,21 @@ while game:
     if finish != True:
         window.fill(back)
         racket1.update_l()
-        racket2.update_l()
+        racket2.update_r()
         ball.rect.x += speed_x
         ball.rect.y += speed_y
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
