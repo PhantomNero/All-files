@@ -13,7 +13,7 @@ img_bullet = 'bullet.png'  # пуля
 score = 0
 lost = 0
 max_lost = 3
-goal = 20
+goal = 100
 life = 3
 
 '''создаём игровое окно'''

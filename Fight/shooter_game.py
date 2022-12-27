@@ -198,7 +198,6 @@ if answer == "anime":
 for i in range(1, 6):
     monster = Enemy(changemonster, randint(20, win_width - 80), -40, 80, cordx, randint(3, 5))
     monsters.add(monster)
-
 bullets = sprite.Group()
 finish = False
 run = True
@@ -277,6 +276,7 @@ while run:
 
         display.update()
     time.delay(60)
+
 
 
 """
